@@ -1,12 +1,23 @@
 import test from './program.js';
 
-function quickSort(numbers, start, end) {
-  if (numbers.length === 1) {
+async function func(numbers) {
+  let quick = await quickSort(numbers);
+  console.log('quick: ', quick);
+}
+
+function quickSort(numbers) {
+  let sortedNumbers = sort(numbers);
+
+  if (sortedNumbers.length < 3) {
     return numbers;
   } else {
-    let array = sort(numbers);
-    console.log(array);
-    return array;
+    let beforePivotIndex = sortedNumbers.findIndex(value => value === numbers[numbers.length]);
+    let left = quickSort(sortedNumbers.slice(0, beforePivotIndex));
+    let right = quickSort(sortedNumbers.slice(beforePivotIndex));
+    
+    let all = left.slice(0);
+    all.push(...right);
+    return all;
   }
 }
 
@@ -17,30 +28,38 @@ function sort(numbers) {
   let pivot = numbers[numbers.length - 1];
 
   while (end - start > 0) {
-    console.log(array[start], array[end]);
-    if (array[start] >= pivot && array[end] < pivot) {
+    if (array[start] < pivot) {
+      start++;
+    }
+
+    if ((array[start] > pivot && array[end] < pivot) ||
+        (end - 1 === start && array[start] > array[end])) {
       let temp = array[end];
       array[end] = array[start];
       array[start] = temp;
     }
 
-    start++;
-    end--;
+    if (array[end] > pivot) {
+      end--;
+    }
+
+    if ((array[start] > pivot && array[end] < pivot) ||
+        (end - 1 === start && array[start] > array[end])) {
+      let temp = array[end];
+      array[end] = array[start];
+      array[start] = temp;
+    }
   }
 
-  if (end < start) {
-    end++;
-  }
-
-  if (array[end] > pivot) {
-    array.splice(end, 0, pivot);
-  } else if (array[start] > pivot) {
-    array.splice(start, 0, pivot);
+  if (array[end] < pivot) {
+    array.splice(end + 1, 0, pivot);
   } else {
-    array.push(pivot);
+    array.splice(end, 0, pivot);
   }
 
   return array;
 }
 
-await test(quickSort, [[42, 32, 24, 60, 15, 5, 90, 45]]);
+await test(func, [[42, 32, 24, 60, 15, 5, 90, 45]]);
+await test(func, [[4, 1, 2, 3, 5]]);
+await test(func, [[3, 2, 8, 1, 7, 4, 5, 6]]);
